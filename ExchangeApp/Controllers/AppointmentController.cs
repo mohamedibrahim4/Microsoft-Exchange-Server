@@ -37,13 +37,11 @@ namespace ExchangeApp.Controllers
                     Importance = Importance.High
                 };
 
-                foreach (var att in request.Attendees)
-                {
-                    if (!string.IsNullOrEmpty(att))
-                    {
-                        appointment.RequiredAttendees.Add(new Attendee(att.Trim()));
-                    }
-                }
+              
+                   
+                        appointment.RequiredAttendees.Add(request.Attendees);
+                    
+                
             
 
                 appointment.Save(SendInvitationsMode.SendToAllAndSaveCopy);

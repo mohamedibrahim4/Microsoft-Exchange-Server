@@ -7,6 +7,6 @@
         public string Location { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public List<string> Attendees { get; set; }
+        public string Attendees { get; set; }
     }
 }
