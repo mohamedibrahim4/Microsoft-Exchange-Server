@@ -18,6 +18,8 @@ namespace ExchangeApp.Controllers
         }
 
         [HttpPost]
+        [Route("CreateAppointment")]
+
         public IActionResult CreateAppointment([FromBody] AppointmentRequest request)
         {
             try
@@ -58,5 +60,6 @@ namespace ExchangeApp.Controllers
                 return BadRequest(new { message = "Error creating appointment: " + ex.Message });
             }
         }
+
     }
 }
