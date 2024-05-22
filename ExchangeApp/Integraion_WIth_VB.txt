@@ -1,0 +1,186 @@
+﻿Public Function CreateMail(ByVal appointment As MailWithAttachmentObj) As String
+    Dim httpRequest As HttpWebRequest = CType(WebRequest.Create("Localhost:5050/api/Mail/CreateMailWithAttachmentInitial"), HttpWebRequest)
+    httpRequest.Method = "POST"
+    httpRequest.ContentType = "multipart/form-data; boundary=----MyBoundary"
+
+    Dim boundary As String = "----MyBoundary"
+    Dim boundaryBytes As Byte() = Encoding.ASCII.GetBytes(vbCrLf & "--" & boundary & vbCrLf)
+    Dim endBoundaryBytes As Byte() = Encoding.ASCII.GetBytes(vbCrLf & "--" & boundary & "--" & vbCrLf)
+
+    Using requestStream As Stream = httpRequest.GetRequestStream()
+        ' Write the JSON part
+        requestStream.Write(boundaryBytes, 0, boundaryBytes.Length)
+        Dim jsonHeader As String = "Content-Disposition: form-data; name=""json""" & vbCrLf & "Content-Type: application/json" & vbCrLf & vbCrLf
+        Dim jsonHeaderBytes As Byte() = Encoding.UTF8.GetBytes(jsonHeader)
+        requestStream.Write(jsonHeaderBytes, 0, jsonHeaderBytes.Length)
+
+        Dim json As String = JsonConvert.SerializeObject(appointment)
+        Dim jsonBytes As Byte() = Encoding.UTF8.GetBytes(json)
+        requestStream.Write(jsonBytes, 0, jsonBytes.Length)
+
+        ' Write the byte[] part (PDF file)
+        requestStream.Write(boundaryBytes, 0, boundaryBytes.Length)
+        Dim fileHeader As String = "Content-Disposition: form-data; name=""file""; filename=""attachment.pdf""" & vbCrLf & "Content-Type: application/pdf" & vbCrLf & vbCrLf
+        Dim fileHeaderBytes As Byte() = Encoding.UTF8.GetBytes(fileHeader)
+        requestStream.Write(fileHeaderBytes, 0, fileHeaderBytes.Length)
+
+        Dim pdfBytes As Byte() = appointment.Attachments ' Assuming Attachments is the byte array
+        requestStream.Write(pdfBytes, 0, pdfBytes.Length)
+
+        ' Write the end boundary
+        requestStream.Write(endBoundaryBytes, 0, endBoundaryBytes.Length)
+
+       
+       requestStream.Flush()
+    End Using
+
+    Using httpResponse As HttpWebResponse = CType(httpRequest.GetResponse(), HttpWebResponse)
+    Using streamReader As New StreamReader(httpResponse.GetResponseStream())
+        Dim result As String = streamReader.ReadToEnd()
+        Return "Email created successfully."
+    End Using
+
+    End Using
+
+    
+End Function
+-------------------------------------------------------------------------------------------------------------------
+
+<Serializable> _
+Public Class MailWithAttachmentObj
+    Private _Subject As String
+    Private _Body As String
+    Private _Attachments As Byte()
+    Private _Attendees As List(Of String)
+
+    Public Sub New()
+        _Attendees = New List(Of String)()
+
+    End Sub
+
+
+    Public Property Subject As String
+        Get
+            Return _Subject
+        End Get
+        Set(value As String)
+            _Subject = value
+        End Set
+    End Property
+    Public Property Body As String
+        Get
+            Return _Body
+        End Get
+        Set(value As String)
+            _Body = value
+        End Set
+    End Property
+    Public Property Attachments As Byte()
+        Get
+            Return _Attachments
+        End Get
+        Set(value As Byte())
+            _Attachments = value
+        End Set
+    End Property
+
+    Public Property Attendees As List(Of String)
+        Get
+            Return _Attendees
+        End Get
+        Set(value As List(Of String))
+            _Attendees = value
+        End Set
+    End Property
+End Class
+-----------------------------------------------------------------------------------------------------------
+ Public Function CreateAppointment(ByVal appointment As AppointmentRequest) As String
+        Dim httpRequest As HttpWebRequest
+        httpRequest = HttpWebRequest.Create("Localhost:5050/api/Appointment/CreateAppointment")
+        httpRequest.Method = "POST"
+        Dim json As String = JsonConvert.SerializeObject(appointment)
+        httpRequest.ContentType = "application/json"
+        httpRequest.Accept = "application/json"
+        Using streamWriter As New StreamWriter(httpRequest.GetRequestStream())
+            streamWriter.Write(json)
+            streamWriter.Flush()
+            streamWriter.Close()
+        End Using
+        Using httpResponse2 As HttpWebResponse = CType(httpRequest.GetResponse(), HttpWebResponse)
+            Using streamReader As New StreamReader(httpResponse2.GetResponseStream())
+                Dim result As String = streamReader.ReadToEnd()
+                Return "Appointment created successfully: " & result
+            End Using
+        End Using
+    End Function
+    ------------------------------------------------------------------------------------------
+    <Serializable> _
+Public Class AppointmentRequest
+    Private _Subject As String
+    Private _Location As String
+    Private _StartTime As DateTime
+    Private _EndTime As DateTime
+    Private _Attendees As List(Of String)
+    Public Property Subject As String
+        Get
+            Return _Subject
+        End Get
+        Set(value As String)
+            _Subject = value
+        End Set
+    End Property
+    Public Property Location As String
+        Get
+            Return _Location
+        End Get
+        Set(value As String)
+            _Location = value
+        End Set
+    End Property
+    Public Property StartTime As Date
+        Get
+            Return _StartTime
+        End Get
+        Set(value As Date)
+            _StartTime = value
+        End Set
+    End Property
+    Public Property EndTime As Date
+        Get
+            Return _EndTime
+        End Get
+        Set(value As Date)
+            _EndTime = value
+        End Set
+    End Property
+    Public Property Attendees As List(Of String)
+        Get
+            Return _Attendees
+        End Get
+        Set(value As List(Of String))
+            _Attendees = value
+        End Set
+    End Property
+End Class
+-------------------------------------------------------------------------------------------------
+ Dim selectpdf = New SelectPdf.HtmlToPdf()
+                    Dim baseUrl = DPP.Web.Utilities.ToAbsoluteUrl("Home.aspx")
+                    Dim url = String.Format("{0}", baseUrl)
+                    Dim doc = selectpdf.ConvertUrl(url)
+                    Dim pdfBytes As Byte()
+                    Using memoryStream As New MemoryStream()
+                        doc.Save(memoryStream)
+                        pdfBytes = memoryStream.ToArray()
+                    End Using
+                    Dim MailWithAttachment As New MailWithAttachmentObj()
+                    MailWithAttachment.Subject = "Subject test "
+                     Dim Body = "test Body"
+                    MailWithAttachment.Body = Body
+                    MailWithAttachment.Attendees = New List(Of String)
+                    MailWithAttachment.Attendees.Add("mm@gmail.com")
+                    MailWithAttachment.Attachments = pdfBytes
+                    Dim result As String = CreateMail(MailWithAttachment)
+                    If result = "Email created successfully." Then
+                        send=True
+                        messagebox("Successfully Send")
+                    End If

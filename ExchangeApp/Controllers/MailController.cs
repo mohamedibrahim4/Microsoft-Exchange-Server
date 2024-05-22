@@ -40,7 +40,7 @@ namespace ExchangeApp.Controllers
                 var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
                 {
                     Credentials = new WebCredentials(_exchangeSettings.UserName, _exchangeSettings.Password),
-                    Url = new Uri("https://mail.dpp.gov.ae/ews/exchange.asmx")
+                    Url = new Uri("Echange Server URL")
                 };
 
                 // Create the email message
@@ -62,7 +62,7 @@ namespace ExchangeApp.Controllers
                 // Add attachment
                 var fileStream = filePart.OpenReadStream();
 
-                email.Attachments.AddFileAttachment("بطاقة_تقييم_مبدئي.pdf", fileStream);
+                email.Attachments.AddFileAttachment("Initial Report.pdf", fileStream);
                 await fileStream.FlushAsync();
                 // Send the email
                 email.SendAndSaveCopy();
@@ -95,7 +95,7 @@ namespace ExchangeApp.Controllers
                 var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
                 {
                     Credentials = new WebCredentials(_exchangeSettings.UserName, _exchangeSettings.Password),
-                    Url = new Uri("https://mail.dpp.gov.ae/ews/exchange.asmx")
+                    Url = new Uri("Echange Server URL")
                 };
 
                 // Create the email message
@@ -117,7 +117,7 @@ namespace ExchangeApp.Controllers
                 // Add attachment
                 var fileStream = filePart.OpenReadStream();
 
-                email.Attachments.AddFileAttachment("بطاقة_تقييم_نهائي.pdf", fileStream);
+                email.Attachments.AddFileAttachment("FinalReport.pdf", fileStream);
                 await fileStream.FlushAsync();
                 // Send the email
                 email.SendAndSaveCopy();

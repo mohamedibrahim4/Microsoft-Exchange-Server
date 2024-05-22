@@ -27,7 +27,7 @@ namespace ExchangeApp.Controllers
                 var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
                 {
                     Credentials = new WebCredentials(_exchangeSettings.UserName, _exchangeSettings.Password),
-                    Url = new Uri("https://mail.dpp.gov.ae/ews/exchange.asmx")
+                    Url = new Uri("Exchange Server URL")
                 };
 
                 var appointment = new Appointment(service)
