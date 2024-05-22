@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Runtime.Intrinsics.Arm;
+using System.Runtime.Serialization;
 
 namespace ExchangeApp.Controllers
 {
@@ -34,14 +35,6 @@ namespace ExchangeApp.Controllers
 
                 // Read the file part
                 IFormFile filePart = formCollection.Files["file"];
-                byte[] fileBytes;
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await filePart.CopyToAsync(memoryStream);
-                    memoryStream.Flush();
-                    fileBytes = memoryStream.ToArray();
-                }
 
                 // Initialize the Exchange service
                 var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
@@ -67,13 +60,14 @@ namespace ExchangeApp.Controllers
                 }
 
                 // Add attachment
-                string outputPath  = @"\\srv-dppapp02\e\ExportAttattchment\بطاقة_تقييم_مبدئي.pdf";
-                email.Attachments.AddFileAttachment(outputPath);
-                //email.Attachments.AddFileAttachment("aa.pdf", fileBytes);
+                var fileStream = filePart.OpenReadStream();
+
+                email.Attachments.AddFileAttachment("بطاقة_تقييم_مبدئي.pdf", fileStream);
+                await fileStream.FlushAsync();
                 // Send the email
                 email.SendAndSaveCopy();
 
-                FileHelper.DeleteFile(outputPath);
+                //FileHelper.DeleteFile(outputPath);
 
                 return Ok(new { message = "Email sent successfully." });
             }
@@ -96,14 +90,6 @@ namespace ExchangeApp.Controllers
 
                 // Read the file part
                 IFormFile filePart = formCollection.Files["file"];
-                byte[] fileBytes;
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await filePart.CopyToAsync(memoryStream);
-                    memoryStream.Flush();
-                    fileBytes = memoryStream.ToArray();
-                }
 
                 // Initialize the Exchange service
                 var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
@@ -129,13 +115,14 @@ namespace ExchangeApp.Controllers
                 }
 
                 // Add attachment
-                string outputPath = @"\\srv-dppapp02\e\ExportAttattchment\بطاقة_تقييم_نهائي.pdf";
-                email.Attachments.AddFileAttachment(outputPath);
-                //email.Attachments.AddFileAttachment("aa.pdf", fileBytes);
+                var fileStream = filePart.OpenReadStream();
+
+                email.Attachments.AddFileAttachment("بطاقة_تقييم_نهائي.pdf", fileStream);
+                await fileStream.FlushAsync();
                 // Send the email
                 email.SendAndSaveCopy();
 
-                FileHelper.DeleteFile(outputPath);
+                //FileHelper.DeleteFile(outputPath);
 
                 return Ok(new { message = "Email sent successfully." });
             }
@@ -145,59 +132,5 @@ namespace ExchangeApp.Controllers
             }
         }
 
-        //public IActionResult CreateMailWithAttachment([FromBody] MailWithAttattchementobj request)
-        //{
-        //    try
-        //    {
-        //        // Initialize the Exchange service
-        //        var service = new ExchangeService(ExchangeVersion.Exchange2010_SP2)
-        //        {
-        //            Credentials = new WebCredentials(_exchangeSettings.UserName, _exchangeSettings.Password),
-        //            Url = new Uri("https://mail.dpp.gov.ae/ews/exchange.asmx")
-        //        };
-
-        //        // Create the email message
-        //        var email = new EmailMessage(service)
-        //        {
-        //            Subject = request.Subject,
-        //            Body = new MessageBody(request.body)
-        //        };
-
-        //        // Add recipients
-        //        foreach (var attendeeEmail in request.Attendees)
-        //        {
-        //            if (!string.IsNullOrWhiteSpace(attendeeEmail))
-        //            {
-        //                email.ToRecipients.Add(attendeeEmail.Trim());
-        //            }
-        //        }
-
-        //        // Add attachment
-        //        MailWithAttattchementobj requestatt= new MailWithAttattchementobj();
-        //        byte[] ss ;
-        //         ss = requestatt.StringWithSeparatorToByteArray(request.Attachments, ",");
-        //            email.Attachments.AddFileAttachment("attachment.pdf", ss);
-
-
-        //        string filePath = @"\\srv-dppapp02\e\PioneerExcellence\outputApi.pdf"; // Specify the full path to the PDF file
-
-        //        // Write the byte array to a file
-        //        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
-        //        {
-        //            fileStream.Write(ss, 0, ss.Length);
-        //        }
-
-
-
-        //        // Send the email
-        //        email.SendAndSaveCopy();
-
-        //        return Ok(new { message = "Email sent successfully." });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new { message = "Error sending email: " + ex.Message });
-        //    }
-        //}
     }
 }
